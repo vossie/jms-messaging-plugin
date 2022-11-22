@@ -41,5 +41,5 @@ public abstract class RabbitMQAuthenticationMethod extends AuthenticationMethod 
     }
 
     public abstract ConnectionFactory getConnectionFactory(String hostname, Integer portNumber,
-                                                           String VirtualHost);
+                                                           String VirtualHost, Boolean secure);
 }

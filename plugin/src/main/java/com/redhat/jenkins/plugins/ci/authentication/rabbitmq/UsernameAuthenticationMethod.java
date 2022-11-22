@@ -41,6 +41,9 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.interceptor.RequirePOST;
 
 import javax.annotation.Nonnull;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -76,13 +79,24 @@ public class UsernameAuthenticationMethod extends RabbitMQAuthenticationMethod {
     }
 
     @Override
-    public ConnectionFactory getConnectionFactory(String hostname, Integer portNumber, String virtualHost) {
+    public ConnectionFactory getConnectionFactory(String hostname, Integer portNumber, String virtualHost, Boolean secure) {
         ConnectionFactory connectionFactory = new ConnectionFactory();
         connectionFactory.setHost(hostname);
         connectionFactory.setPort(portNumber);
         connectionFactory.setVirtualHost(virtualHost);
         connectionFactory.setUsername(getUsername());
         connectionFactory.setPassword(getPassword().getPlainText());
+
+        if (Objects.nonNull(secure) && secure) {
+            try {
+                connectionFactory.useSslProtocol();
+            } catch (NoSuchAlgorithmException e) {
+                throw new RuntimeException(e);
+            } catch (KeyManagementException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         return connectionFactory;
     }
 
@@ -114,7 +128,8 @@ public class UsernameAuthenticationMethod extends RabbitMQAuthenticationMethod {
                                                @QueryParameter("portNumber") Integer portNumber,
                                                @QueryParameter("virtualHost") String virtualHost,
                                                @QueryParameter("username") String username,
-                                               @QueryParameter("password") String password) {
+                                               @QueryParameter("password") String password,
+                                               @QueryParameter("secure") Boolean secure) {
 
             checkAdmin();
 
@@ -122,7 +137,7 @@ public class UsernameAuthenticationMethod extends RabbitMQAuthenticationMethod {
             Channel channel = null;
             try {
                 UsernameAuthenticationMethod uam = new UsernameAuthenticationMethod(username, Secret.fromString(password));
-                ConnectionFactory connectionFactory = uam.getConnectionFactory(hostname, portNumber, virtualHost);
+                ConnectionFactory connectionFactory = uam.getConnectionFactory(hostname, portNumber, virtualHost, secure);
                 connection = connectionFactory.newConnection();
                 channel = connection.createChannel();
                 channel.close();

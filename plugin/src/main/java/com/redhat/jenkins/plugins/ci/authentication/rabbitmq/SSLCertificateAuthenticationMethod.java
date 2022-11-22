@@ -45,7 +45,10 @@ import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 import java.io.FileInputStream;
+import java.security.KeyManagementException;
 import java.security.KeyStore;
+import java.security.NoSuchAlgorithmException;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -109,7 +112,7 @@ public class SSLCertificateAuthenticationMethod extends RabbitMQAuthenticationMe
     }
 
     @Override
-    public ConnectionFactory getConnectionFactory(String hostname, Integer portNumber, String virtualHost) {
+    public ConnectionFactory getConnectionFactory(String hostname, Integer portNumber, String virtualHost, Boolean secure) {
         try {
             // Prepare SSL context
             KeyStore ks = KeyStore.getInstance("PKCS12");
@@ -135,6 +138,17 @@ public class SSLCertificateAuthenticationMethod extends RabbitMQAuthenticationMe
             connectionFactory.useSslProtocol(c);
             connectionFactory.setSaslConfig(DefaultSaslConfig.EXTERNAL);
             connectionFactory.enableHostnameVerification();
+
+            if (Objects.nonNull(secure) && secure) {
+                try {
+                    connectionFactory.useSslProtocol();
+                } catch (NoSuchAlgorithmException e) {
+                    throw new RuntimeException(e);
+                } catch (KeyManagementException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
             return connectionFactory;
         } catch (Exception e) {
             log.log(Level.SEVERE, "Unhandled exception creating connection factory.", e);
@@ -171,6 +185,7 @@ public class SSLCertificateAuthenticationMethod extends RabbitMQAuthenticationMe
                                                @QueryParameter("hostname") String hostname,
                                                @QueryParameter("portNumber") Integer portNumber,
                                                @QueryParameter("virtualHost") String virtualHost,
+                                               @QueryParameter("secure") Boolean secure,
                                                @QueryParameter("keystore") String keystore,
                                                @QueryParameter("keypwd") String keypwd,
                                                @QueryParameter("truststore") String truststore,
@@ -183,7 +198,7 @@ public class SSLCertificateAuthenticationMethod extends RabbitMQAuthenticationMe
             try {
                 SSLCertificateAuthenticationMethod sam = new SSLCertificateAuthenticationMethod(username,
                         keystore, Secret.fromString(keypwd), truststore, Secret.fromString(trustpwd));
-                ConnectionFactory connectionFactory = sam.getConnectionFactory(hostname, portNumber, virtualHost);
+                ConnectionFactory connectionFactory = sam.getConnectionFactory(hostname, portNumber, virtualHost, secure);
                 connection = connectionFactory.newConnection();
                 channel = connection.createChannel();
                 channel.close();

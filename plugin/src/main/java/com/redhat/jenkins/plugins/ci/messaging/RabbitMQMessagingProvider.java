@@ -30,10 +30,12 @@ public class RabbitMQMessagingProvider extends JMSMessagingProvider {
     private final String exchange;
     private final String queue;
 
+    private final Boolean secure;
+
     @DataBoundConstructor
     public RabbitMQMessagingProvider(String name, String virtualHost,
                                      String hostname, Integer portNumber,
-                                     String topic, String exchange, String queue,
+                                     String topic, String exchange, String queue, Boolean secure,
                                      RabbitMQAuthenticationMethod authenticationMethod) {
         this.name = name;
         this.virtualHost = virtualHost;
@@ -42,7 +44,7 @@ public class RabbitMQMessagingProvider extends JMSMessagingProvider {
         this.topic = topic;
         this.exchange = exchange;
         this.queue = queue;
-        this.authenticationMethod = authenticationMethod;
+        this.secure = true;
     }
 
     public String getVirtualHost() {
@@ -73,6 +75,10 @@ public class RabbitMQMessagingProvider extends JMSMessagingProvider {
         return connection;
     }
 
+    public Boolean getSecure() {
+        return secure;
+    }
+
     public void setConnection(Connection connection) {
         this.connection = connection;
     }
@@ -82,7 +88,7 @@ public class RabbitMQMessagingProvider extends JMSMessagingProvider {
     }
 
     public ConnectionFactory getConnectionFactory() {
-        return authenticationMethod.getConnectionFactory(getHostname(), getPortNumber(), getVirtualHost());
+        return authenticationMethod.getConnectionFactory(getHostname(), getPortNumber(), getVirtualHost(), getSecure());
     }
 
     @Override
