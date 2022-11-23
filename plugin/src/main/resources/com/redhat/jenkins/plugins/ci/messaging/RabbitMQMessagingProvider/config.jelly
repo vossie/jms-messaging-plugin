@@ -47,6 +47,9 @@
     <f:entry title="${%Queue}" field="queue">
       <f:textbox />
     </f:entry>
+    <f:entry title="${%Secure}" field="secure">
+      <f:checkbox />
+    </f:entry>
     <f:dropdownDescriptorSelector name="authenticationMethod"
                                   title="${%Authentication Method}"
                                   field="authenticationMethod"

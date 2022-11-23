@@ -35,8 +35,8 @@ public class RabbitMQMessagingProvider extends JMSMessagingProvider {
     @DataBoundConstructor
     public RabbitMQMessagingProvider(String name, String virtualHost,
                                      String hostname, Integer portNumber,
-                                     String topic, String exchange, String queue, Boolean secure,
-                                     RabbitMQAuthenticationMethod authenticationMethod) {
+                                     String topic, String exchange, String queue,
+                                     RabbitMQAuthenticationMethod authenticationMethod, Boolean secure) {
         this.name = name;
         this.virtualHost = virtualHost;
         this.hostname = hostname;
@@ -44,7 +44,8 @@ public class RabbitMQMessagingProvider extends JMSMessagingProvider {
         this.topic = topic;
         this.exchange = exchange;
         this.queue = queue;
-        this.secure = true;
+        this.authenticationMethod = authenticationMethod;
+        this.secure = secure;
     }
 
     public String getVirtualHost() {

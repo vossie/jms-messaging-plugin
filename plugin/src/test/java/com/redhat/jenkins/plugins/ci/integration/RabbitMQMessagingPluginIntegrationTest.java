@@ -62,8 +62,8 @@ public class RabbitMQMessagingPluginIntegrationTest extends SharedMessagingPlugi
     @Before
     public void setUp() {
         GlobalCIConfiguration.get().setConfigs(Collections.singletonList(new RabbitMQMessagingProvider(
-                DEFAULT_PROVIDER_NAME, "/", rabbitmq.getIpAddress(), rabbitmq.getPort(), "CI", "amq.fanout", "",false,
-                new UsernameAuthenticationMethod("guest", Secret.fromString("guest"))
+                DEFAULT_PROVIDER_NAME, "/", rabbitmq.getIpAddress(), rabbitmq.getPort(), "CI", "amq.fanout", "",
+                new UsernameAuthenticationMethod("guest", Secret.fromString("guest")), false
         )));
 
         // TODO Test connection
